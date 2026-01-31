@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const extractRouter = require('./routes/extract');
+const groceryRouter = require('./routes/grocery');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/', extractRouter);
+app.use('/', groceryRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

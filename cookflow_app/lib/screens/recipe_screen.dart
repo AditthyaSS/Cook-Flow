@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/json_viewer.dart';
 import '../theme.dart';
+import 'grocery_list_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
   const RecipeScreen({super.key});
@@ -54,6 +55,30 @@ class _RecipeScreenState extends State<RecipeScreen> {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
       });
       _showError(_errorMessage!);
+    }
+  }
+
+  Future<void> _generateGroceryList() async {
+    if (_extractedRecipe == null) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final groceryList = await ApiService.generateGroceryList([_extractedRecipe!]);
+      
+      setState(() => _isLoading = false);
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GroceryListScreen(groceryList: groceryList),
+        ),
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showError('Failed to generate grocery list: ${e.toString().replaceAll('Exception: ', '')}');
     }
   }
 
@@ -185,8 +210,37 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 const SizedBox(height: AppTheme.spacingL),
                 
                 // Results Section
-                if (_extractedRecipe != null) ...[
+                if (_extractedRecipe != null) ...[ 
                   RecipeCard(recipe: _extractedRecipe!),
+                  const SizedBox(height: AppTheme.spacingM),
+                  
+                  // Phase 2: Grocery List Button
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.spacingL),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Next Steps',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spacingM),
+                          ElevatedButton.icon(
+                            onPressed: _isLoading ? null : _generateGroceryList,
+                            icon: const Icon(Icons.shopping_cart),
+                            label: const Text('Generate Grocery List'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.all(AppTheme.spacingM),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
                   const SizedBox(height: AppTheme.spacingM),
                   JsonViewer(data: _extractedRecipe!.toJson()),
                 ],

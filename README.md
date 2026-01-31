@@ -16,14 +16,26 @@ This is an **execution-focused cooking app**, not a browsing app. Turn saved rec
 
 ---
 
-## ✨ Features (Phase 1 - Current)
+## ✨ Features
 
+### Phase 1 - Recipe Extraction
 - 🤖 **AI-Powered Extraction** - Google Gemini 1.5 Flash for intelligent recipe parsing
 - 📋 **Structured Output** - Title, servings, ingredients with quantities, step-by-step instructions
 - 🎨 **Beautiful UI** - Warm, food-inspired Material 3 design with rounded corners and generous spacing
 - 📱 **Mobile First** - Flutter app optimized for iOS and Android
 - ⚡ **Fast & Reliable** - 30s timeout, retry logic, robust error handling
-- ✅ **Production Ready** - Clean architecture, defensive coding, comprehensive validation
+
+### Phase 2 - Shopping & Pantry (NEW!)
+- 🛒 **Smart Grocery Lists** - AI categorizes ingredients into grocery store sections
+- 🔗 **Affiliate Links** - Buy ingredients online via Amazon/Instacart (optional)
+- 📦 **Pantry Tracking** - Track what you have with expiry date warnings
+- 🔄 **Bottom Navigation** - Easy access to Extract, Groceries, and Pantry
+- 📤 **Share Lists** - Export grocery lists as text to share
+- 🔍 **Search & Filter** - Quickly find items in your pantry
+
+### Production Ready
+- ✅ Clean architecture, defensive coding, comprehensive validation
+- ✅ No debug UI - everything is polished and production-grade
 
 ---
 
@@ -48,6 +60,7 @@ This is an **execution-focused cooking app**, not a browsing app. Turn saved rec
 |-----------|------------|
 | **Mobile** | Flutter (Dart) |
 | **Backend** | Node.js + Express |
+| **Database** | SQLite (local pantry storage) |
 | **AI** | Google Gemini 1.5 Flash API (free tier) |
 | **Payments** | RevenueCat (Phase 3) |
 
@@ -60,9 +73,12 @@ cookflow/
 ├── backend/                    # Node.js API Server
 │   ├── server.js              # Express app
 │   ├── routes/
-│   │   └── extract.js         # /extract-recipe endpoint
+│   │   ├── extract.js         # /extract-recipe endpoint (Phase 1)
+│   │   └── grocery.js         # /generate-grocery-list, /generate-affiliate-links (Phase 2)
 │   ├── services/
-│   │   └── geminiService.js   # Gemini AI integration
+│   │   ├── geminiService.js   # Recipe extraction (Phase 1)
+│   │   ├── groceryService.js  # Grocery list generation (Phase 2)
+│   │   └── affiliateService.js # Affiliate link generation (Phase 2)
 │   ├── utils/
 │   │   └── jsonValidator.js   # JSON schema validator
 │   ├── package.json
@@ -71,15 +87,20 @@ cookflow/
 │
 └── cookflow_app/              # Flutter Mobile App
     ├── lib/
-    │   ├── main.dart          # App entry
+    │   ├── main.dart          # App entry with bottom navigation
     │   ├── theme.dart         # Custom Material 3 theme
     │   ├── screens/
-    │   │   └── recipe_screen.dart
+    │   │   ├── recipe_screen.dart      # Recipe extraction (Phase 1)
+    │   │   ├── grocery_list_screen.dart # Grocery lists (Phase 2)
+    │   │   └── pantry_screen.dart      # Pantry tracking (Phase 2)
     │   ├── services/
-    │   │   └── api_service.dart
+    │   │   ├── api_service.dart        # Backend API client
+    │   │   └── database_service.dart   # SQLite pantry DB (Phase 2)
     │   └── widgets/
-    │       ├── recipe_card.dart
-    │       └── json_viewer.dart
+    │       ├── recipe_card.dart        # Recipe display (Phase 1)
+    │       ├── json_viewer.dart        # Debug viewer (Phase 1)
+    │       ├── grocery_item_tile.dart  # Grocery item (Phase 2)
+    │       └── pantry_item_card.dart   # Pantry item (Phase 2)
     ├── pubspec.yaml
     └── README.md
 ```
@@ -185,23 +206,28 @@ flutter run
 
 ## 📋 Phase Roadmap
 
-### ✅ Phase 1 (Current - MVP)
+### ✅ Phase 1 (Complete - MVP)
 - [x] Gemini extraction backend
 - [x] Flutter app shell
 - [x] Extraction UI
 - [x] Structured JSON display
 - [x] Beautiful, polished design
 
-### 🔜 Phase 2 (Next)
-- [ ] Grocery list generator
-- [ ] Affiliate purchase links
-- [ ] Pantry tracking system
+### ✅ Phase 2 (Complete - Shopping & Pantry)
+- [x] AI-powered grocery list generator with smart categorization
+- [x] Affiliate purchase links (Amazon & Instacart)
+- [x] Local pantry tracking system with expiry warnings
+- [x] Bottom tab navigation
+- [x] Share grocery lists
+- [x] Search and filter pantry items
 
-### 🚀 Phase 3 (Future)
+### 🚀 Phase 3 (Future - Premium Features)
 - [ ] RevenueCat subscriptions
+- [ ] Cloud sync for pantry items
+- [ ] Multi-recipe grocery list aggregation
 - [ ] Meal planning features
 - [ ] Premium tier unlocks
-- [ ] Smart recommendations
+- [ ] Smart pantry-based recommendations
 
 ---
 
