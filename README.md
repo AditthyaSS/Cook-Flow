@@ -1,182 +1,137 @@
-# 🍳 CookFlow
+<div align="center">
 
-**Production-grade recipe extraction mobile app MVP for Creator Hackathon**
+![CookFlow Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=200&section=header&text=CookFlow&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=fff)
 
-Transform saved recipes into real cooking action with AI-powered extraction, structured data, and beautiful mobile UI.
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Node.js](https://img.shields.io/badge/Node.js-16+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Gemini AI](https://img.shields.io/badge/Gemini_AI-1.5_Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+**Transform saved recipes into actionable cooking workflows with AI-powered extraction**
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Tech Stack](#️-tech-stack) • [API Docs](#-api-documentation)
+
+</div>
 
 ---
 
-## 🎯 Overview
+## 🎯 What is CookFlow?
 
-CookFlow converts recipe links or text into structured, actionable cooking workflows:
+An **execution-focused cooking app** that converts recipe links or text into structured, actionable cooking workflows.
 
-**Recipe Text → Structured JSON → Beautiful Display → Future: Grocery Lists & Affiliate Links**
+```
+Recipe Text → AI Extraction → Beautiful Display → Smart Grocery Lists → Cook! 🍳
+```
 
-This is an **execution-focused cooking app**, not a browsing app. Turn saved recipes into real cooking action.
+> **Not a recipe browsing app** — CookFlow turns saved recipes into real cooking action.
 
 ---
 
 ## ✨ Features
 
-### Phase 1 - Recipe Extraction
-- 🤖 **AI-Powered Extraction** - Google Gemini 1.5 Flash for intelligent recipe parsing
-- 📋 **Structured Output** - Title, servings, ingredients with quantities, step-by-step instructions
-- 🎨 **Beautiful UI** - Warm, food-inspired Material 3 design with rounded corners and generous spacing
-- 📱 **Mobile First** - Flutter app optimized for iOS and Android
-- ⚡ **Fast & Reliable** - 30s timeout, retry logic, robust error handling
+<table>
+<tr>
+<td width="50%">
 
-### Phase 2 - Shopping & Pantry (NEW!)
-- 🛒 **Smart Grocery Lists** - AI categorizes ingredients into grocery store sections
-- 🔗 **Affiliate Links** - Buy ingredients online via Amazon/Instacart (optional)
-- 📦 **Pantry Tracking** - Track what you have with expiry date warnings
-- 🔄 **Bottom Navigation** - Easy access to Extract, Groceries, and Pantry
-- 📤 **Share Lists** - Export grocery lists as text to share
-- 🔍 **Search & Filter** - Quickly find items in your pantry
+### 🤖 Phase 1 - AI Extraction
+- **Smart Parsing** with Google Gemini 1.5 Flash
+- **Structured Output** (title, servings, ingredients, steps)
+- **Beautiful Material 3 UI** with warm, food-inspired design
+- **Mobile-First** Flutter app for iOS & Android
+- **Robust** with 30s timeout & retry logic
 
-### Production Ready
-- ✅ Clean architecture, defensive coding, comprehensive validation
-- ✅ No debug UI - everything is polished and production-grade
+</td>
+<td width="50%">
 
----
+### 🛒 Phase 2 - Shopping & Pantry
+- **Smart Grocery Lists** with AI categorization
+- **Affiliate Links** for Amazon/Instacart
+- **Pantry Tracking** with expiry warnings
+- **Bottom Navigation** for seamless UX
+- **Share & Export** grocery lists
+- **Search & Filter** your pantry items
 
-## 💰 Monetization Strategy
-
-### Engine 1: Subscription (Future - RevenueCat)
-- Premium planning features
-- Pantry tracking
-- Unlimited imports
-- Smart meal plans
-
-### Engine 2: Affiliate (Future)
-- Grocery purchase redirects
-- Owner-managed affiliate tags
-- Seamless checkout integration
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Mobile** | Flutter (Dart) |
-| **Backend** | Node.js + Express |
-| **Database** | SQLite (local pantry storage) |
-| **AI** | Google Gemini 1.5 Flash API (free tier) |
-| **Payments** | RevenueCat (Phase 3) |
+<div align="center">
 
----
+| Layer | Technology | Purpose |
+|:------|:-----------|:--------|
+| 📱 **Mobile** | Flutter (Dart) | Cross-platform native app |
+| ⚙️ **Backend** | Node.js + Express | REST API server |
+| 💾 **Database** | SQLite | Local pantry storage |
+| 🤖 **AI** | Google Gemini 1.5 Flash | Recipe extraction & grocery categorization |
+| 💳 **Payments** | RevenueCat (Phase 3) | Subscription management |
 
-## 📁 Project Structure
-
-```
-cookflow/
-├── backend/                    # Node.js API Server
-│   ├── server.js              # Express app
-│   ├── routes/
-│   │   ├── extract.js         # /extract-recipe endpoint (Phase 1)
-│   │   └── grocery.js         # /generate-grocery-list, /generate-affiliate-links (Phase 2)
-│   ├── services/
-│   │   ├── geminiService.js   # Recipe extraction (Phase 1)
-│   │   ├── groceryService.js  # Grocery list generation (Phase 2)
-│   │   └── affiliateService.js # Affiliate link generation (Phase 2)
-│   ├── utils/
-│   │   └── jsonValidator.js   # JSON schema validator
-│   ├── package.json
-│   ├── .env.example
-│   └── README.md
-│
-└── cookflow_app/              # Flutter Mobile App
-    ├── lib/
-    │   ├── main.dart          # App entry with bottom navigation
-    │   ├── theme.dart         # Custom Material 3 theme
-    │   ├── screens/
-    │   │   ├── recipe_screen.dart      # Recipe extraction (Phase 1)
-    │   │   ├── grocery_list_screen.dart # Grocery lists (Phase 2)
-    │   │   └── pantry_screen.dart      # Pantry tracking (Phase 2)
-    │   ├── services/
-    │   │   ├── api_service.dart        # Backend API client
-    │   │   └── database_service.dart   # SQLite pantry DB (Phase 2)
-    │   └── widgets/
-    │       ├── recipe_card.dart        # Recipe display (Phase 1)
-    │       ├── json_viewer.dart        # Debug viewer (Phase 1)
-    │       ├── grocery_item_tile.dart  # Grocery item (Phase 2)
-    │       └── pantry_item_card.dart   # Pantry item (Phase 2)
-    ├── pubspec.yaml
-    └── README.md
-```
+</div>
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-- **Node.js** 16+ and npm
-- **Flutter** SDK 3.0+
-- **Google Gemini API Key** ([Get one here](https://makersuite.google.com/app/apikey))
-
-### 1. Backend Setup
-
 ```bash
-cd cookflow/backend
-npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env and add: GEMINI_API_KEY=your_key_here
-
-# Start server
-npm start
+✓ Node.js 16+
+✓ Flutter SDK 3.0+
+✓ Google Gemini API Key
 ```
 
-Server runs on `http://localhost:3000`
-
-### 2. Flutter App Setup
-
+### 1️⃣ Backend Setup
 ```bash
-cd cookflow/cookflow_app
+cd backend
+npm install
+cp .env.example .env  # Add your GEMINI_API_KEY
+npm start             # Server runs on http://localhost:3000
+```
+
+### 2️⃣ Flutter App Setup
+```bash
+cd cookflow_app
 flutter pub get
-
-# Configure backend URL in lib/services/api_service.dart
-# For Android Emulator: http://10.0.2.2:3000
-# For iOS Simulator: http://localhost:3000
-
-# Run app
 flutter run
+
+# Configure API endpoint in lib/services/api_service.dart:
+# Android Emulator: http://10.0.2.2:3000
+# iOS Simulator: http://localhost:3000
 ```
 
 ---
 
-## 📸 UI Design Philosophy
+## 🎨 Design Philosophy
+
+<div align="center">
 
 ### Color Palette
-- **Primary**: Warm Orange `#FF6B35`
-- **Accent**: Fresh Green `#4CAF50`
-- **Background**: Soft Off-White `#FAFAFA`
-- **Cards**: Pure White `#FFFFFF` with subtle shadows
+🧡 **Primary** `#FF6B35` • 💚 **Accent** `#4CAF50` • 🤍 **Background** `#FAFAFA`
 
-### Design Principles
-✅ Modern minimal aesthetic  
-✅ Warm food-inspired colors  
-✅ Soft rounded corners (16-20px radius)  
-✅ Generous spacing and padding  
-✅ Card-based layout with elevation  
-✅ Smooth loading and error states  
+### Principles
+**Modern Minimal** • **Food-Inspired** • **Generous Spacing** • **Production-Grade**
+
+✅ Rounded corners & soft shadows  
 ✅ Strong typography hierarchy  
-✅ NO default ugly widgets  
-✅ NO debug-looking UI  
+✅ Smooth loading & error states  
+❌ No debug UI or default widgets
 
-**This is production-grade, not a template demo.**
+</div>
 
 ---
 
 ## 🎯 API Documentation
 
-### Extract Recipe Endpoint
+### Extract Recipe API
 
-**POST** `/extract-recipe`
+```http
+POST /extract-recipe
+Content-Type: application/json
+```
 
-**Request:**
+**Request Body:**
 ```json
 {
   "raw_text": "Recipe text (minimum 50 characters)..."
@@ -191,138 +146,134 @@ flutter run
     "title": "Chocolate Chip Cookies",
     "servings": "24 cookies",
     "ingredients": [
-      { "quantity": "2 cups", "item": "all-purpose flour" },
-      { "quantity": "1 cup", "item": "butter, softened" }
+      { "quantity": "2 cups", "item": "all-purpose flour" }
     ],
-    "steps": [
-      "Preheat oven to 350°F",
-      "Mix butter and sugar until fluffy"
-    ]
+    "steps": ["Preheat oven to 350°F", "Mix ingredients..."]
   }
 }
 ```
 
 ---
 
-## 📋 Phase Roadmap
+## 📋 Roadmap
 
-### ✅ Phase 1 (Complete - MVP)
-- [x] Gemini extraction backend
-- [x] Flutter app shell
-- [x] Extraction UI
-- [x] Structured JSON display
-- [x] Beautiful, polished design
+| Phase | Status | Features |
+|:------|:-------|:---------|
+| **Phase 1** | ✅ Complete | Recipe extraction, Beautiful UI, JSON display |
+| **Phase 2** | ✅ Complete | Grocery lists, Pantry tracking, Affiliate links |
+| **Phase 3** | 🚧 Planned | Subscriptions, Cloud sync, Meal planning |
 
-### ✅ Phase 2 (Complete - Shopping & Pantry)
-- [x] AI-powered grocery list generator with smart categorization
-- [x] Affiliate purchase links (Amazon & Instacart)
-- [x] Local pantry tracking system with expiry warnings
-- [x] Bottom tab navigation
-- [x] Share grocery lists
-- [x] Search and filter pantry items
+---
 
-### 🚀 Phase 3 (Future - Premium Features)
-- [ ] RevenueCat subscriptions
-- [ ] Cloud sync for pantry items
-- [ ] Multi-recipe grocery list aggregation
-- [ ] Meal planning features
-- [ ] Premium tier unlocks
-- [ ] Smart pantry-based recommendations
+## 📁 Project Structure
+
+```
+cookflow/
+├── backend/                 # Node.js + Express API
+│   ├── routes/             # API endpoints
+│   ├── services/           # Gemini AI, Grocery, Affiliate
+│   └── utils/              # JSON validation
+│
+└── cookflow_app/           # Flutter Mobile App
+    ├── lib/
+    │   ├── screens/        # Recipe, Grocery, Pantry
+    │   ├── services/       # API client, SQLite DB
+    │   └── widgets/        # Reusable components
+    └── pubspec.yaml
+```
 
 ---
 
 ## 🧪 Testing
 
-### Backend Test
+<details>
+<summary><b>Backend Test (CLI)</b></summary>
+
 ```bash
 curl -X POST http://localhost:3000/extract-recipe \
   -H "Content-Type: application/json" \
   -d '{
-    "raw_text": "Chocolate Chip Cookies: Mix 2 cups flour, 1 cup butter, 1 cup sugar, 2 eggs. Add 1 cup chocolate chips. Bake at 350F for 12 minutes until golden."
+    "raw_text": "Mix 2 cups flour, 1 cup butter, 1 cup sugar. Bake at 350F for 12 min."
   }'
 ```
+</details>
 
-### Mobile App Test
+<details>
+<summary><b>Mobile App Test</b></summary>
+
 1. Launch app on emulator/device
-2. Paste the example recipe above
+2. Paste example recipe
 3. Tap "Extract Recipe"
 4. Verify beautiful card display
-5. Check JSON viewer for structured data
+5. Check structured data in JSON viewer
+</details>
 
 ---
 
-## 🎨 UI/UX Quality Checklist
+## 🔧 Architecture
 
-- ✅ Warm, food-inspired color palette
-- ✅ Rounded corners (16-20px)
-- ✅ Generous spacing (16-32px padding)
-- ✅ Card-based layout with shadows
-- ✅ Smooth loading spinner
-- ✅ Disabled button during request
-- ✅ Styled error snackbar
-- ✅ Empty state messaging
-- ✅ Keyboard-safe scrolling
-- ✅ Responsive spacing
-- ✅ Clean sans-serif typography
-- ✅ Strong visual hierarchy
+<div align="center">
 
-**Result: Production-grade aesthetic that wows users.**
-
----
-
-## 🔧 Architecture Highlights
-
-### Backend
-- Express REST API with CORS
-- Gemini AI service with precise prompting
-- JSON schema validation
-- 30-second timeout with retry
-- Structured error responses
-
-### Frontend
-- Clean widget architecture
-- Separation of concerns (screens/widgets/services)
-- Type-safe API models
-- Reusable theme system
-- Defensive error handling
-
----
-
-## 📝 Environment Variables
-
-### Backend `.env`
-```bash
-GEMINI_API_KEY=your_gemini_api_key
-PORT=3000
+```mermaid
+graph LR
+    A[Flutter App] -->|HTTP| B[Express API]
+    B -->|Prompt| C[Gemini AI]
+    B -->|Validate| D[JSON Schema]
+    A -->|Store| E[SQLite DB]
+    C -->|Response| B
+    B -->|JSON| A
 ```
+
+**Clean Architecture** • **Type-Safe** • **Defensive Coding** • **Production-Ready**
+
+</div>
+
+---
+
+## 💰 Monetization
+
+| Engine | Strategy | Platform |
+|:-------|:---------|:---------|
+| 🔑 **Subscription** | Premium features, unlimited imports, meal plans | RevenueCat |
+| 🔗 **Affiliate** | Grocery purchase redirects (Amazon, Instacart) | Custom integration |
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Backend Issues
-- **"GEMINI_API_KEY is not configured"**: Add API key to `.env`
-- **"Request timeout"**: Check Gemini API status, retry
+<details>
+<summary><b>Backend Issues</b></summary>
 
-### Flutter Issues
-- **"Failed to connect"**: Check backend URL in `api_service.dart`
-- **Android emulator**: Use `10.0.2.2:3000` not `localhost:3000`
-- **Build errors**: Run `flutter clean && flutter pub get`
+- `GEMINI_API_KEY is not configured` → Add key to `.env`
+- `Request timeout` → Check Gemini API status, retry request
+</details>
+
+<details>
+<summary><b>Flutter Issues</b></summary>
+
+- `Failed to connect` → Verify backend URL in `api_service.dart`
+- Android emulator → Use `10.0.2.2:3000` not `localhost:3000`
+- Build errors → Run `flutter clean && flutter pub get`
+</details>
 
 ---
 
 ## 📄 License
 
-MIT
+Released under the [MIT License](LICENSE)
 
 ---
 
-## 🏆 Built For
+<div align="center">
 
-**Creator Hackathon** - Production-grade mobile app MVP
+### 🏆 Built For Creator Hackathon
 
-**Goal**: Real, monetizable application with beautiful UX, not a template demo.
+**Goal:** Real, monetizable application with beautiful UX, not a template demo
 
 ---
 
-**Built with ❤️ and AI**
+**Made with ❤️ and AI**
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=100&section=footer)
+
+</div>
