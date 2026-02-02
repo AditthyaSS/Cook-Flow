@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/json_viewer.dart';
+import '../widgets/loading_shimmer.dart';
 import '../theme.dart';
 import 'grocery_list_screen.dart';
 
@@ -247,8 +248,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 
                 const SizedBox(height: AppTheme.spacingL),
                 
-                // Results Section
-                if (_extractedRecipe != null) ...[ 
+                // Results Section with Shimmer Loading
+                if (_isLoading) ...[
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: const RecipeCardShimmer(),
+                  ),
+                ] else if (_extractedRecipe != null) ...[
                   RecipeCard(recipe: _extractedRecipe!),
                   const SizedBox(height: AppTheme.spacingM),
                   
