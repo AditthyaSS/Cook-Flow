@@ -1,6 +1,167 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+/// Recipe data model
+class Recipe {
+  final int? id;
+  final String title;
+  final String servings;
+  final List<Map<String, String>> ingredients; // {quantity, item}
+  final List<String> steps;
+  final DateTime createdDate;
+  final bool isFavorite;
+
+  Recipe({
+    this.id,
+    required this.title,
+    required this.servings,
+    required this.ingredients,
+    required this.steps,
+    DateTime? createdDate,
+    this.isFavorite = false,
+  }) : createdDate = createdDate ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'servings': servings,
+      'ingredients': _encodeIngredients(ingredients),
+      'steps': _encodeSteps(steps),
+      'createdDate': createdDate.toIso8601String(),
+      'isFavorite': isFavorite ? 1 : 0,
+    };
+  }
+
+  factory Recipe.fromMap(Map<String, dynamic> map) {
+    return Recipe(
+      id: map['id'] as int?,
+      title: map['title'] as String,
+      servings: map['servings'] as String,
+      ingredients: _decodeIngredients(map['ingredients'] as String),
+      steps: _decodeSteps(map['steps'] as String),
+      createdDate: DateTime.parse(map['createdDate'] as String),
+      isFavorite: (map['isFavorite'] as int) == 1,
+    );
+  }
+
+  // Encode ingredients list as JSON string
+  static String _encodeIngredients(List<Map<String, String>> ingredients) {
+    final items = ingredients.map((i) => '${i['quantity']}|||${i['item']}').join(';;;');
+    return items;
+  }
+
+  // Decode ingredients JSON string to list
+  static List<Map<String, String>> _decodeIngredients(String encoded) {
+    if (encoded.isEmpty) return [];
+    return encoded.split(';;;').map((item) {
+      final parts = item.split('|||');
+      return {'quantity': parts[0], 'item': parts[1]};
+    }).toList();
+  }
+
+  // Encode steps list as JSON string
+  static String _encodeSteps(List<String> steps) {
+    return steps.join('|||');
+  }
+
+  // Decode steps JSON string to list
+  static List<String> _decodeSteps(String encoded) {
+    if (encoded.isEmpty) return [];
+    return encoded.split('|||');
+  }
+
+  Recipe copyWith({
+    int? id,
+    String? title,
+    String? servings,
+    List<Map<String, String>>? ingredients,
+    List<String>? steps,
+    DateTime? createdDate,
+    bool? isFavorite,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      servings: servings ?? this.servings,
+      ingredients: ingredients ?? this.ingredients,
+      steps: steps ?? this.steps,
+      createdDate: createdDate ?? this.createdDate,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
+}
+
+/// Meal Plan data model
+class MealPlan {
+  final int? id;
+  final int recipeId;
+  final DateTime date;
+  final String mealType; // breakfast, lunch, dinner, snack
+  final String? notes;
+  final DateTime createdDate;
+
+  // Computed field (not stored in DB, populated via join)
+  Recipe? recipe;
+
+  MealPlan({
+    this.id,
+    required this.recipeId,
+    required this.date,
+    required this.mealType,
+    this.notes,
+    DateTime? createdDate,
+    this.recipe,
+  }) : createdDate = createdDate ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'recipeId': recipeId,
+      'date': _dateOnly(date),
+      'mealType': mealType,
+      'notes': notes,
+      'createdDate': createdDate.toIso8601String(),
+    };
+  }
+
+  factory MealPlan.fromMap(Map<String, dynamic> map) {
+    return MealPlan(
+      id: map['id'] as int?,
+      recipeId: map['recipeId'] as int,
+      date: DateTime.parse(map['date'] as String),
+      mealType: map['mealType'] as String,
+      notes: map['notes'] as String?,
+      createdDate: DateTime.parse(map['createdDate'] as String),
+    );
+  }
+
+  // Helper to store date without time component
+  static String _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day).toIso8601String();
+  }
+
+  MealPlan copyWith({
+    int? id,
+    int? recipeId,
+    DateTime? date,
+    String? mealType,
+    String? notes,
+    DateTime? createdDate,
+    Recipe? recipe,
+  }) {
+    return MealPlan(
+      id: id ?? this.id,
+      recipeId: recipeId ?? this.recipeId,
+      date: date ?? this.date,
+      mealType: mealType ?? this.mealType,
+      notes: notes ?? this.notes,
+      createdDate: createdDate ?? this.createdDate,
+      recipe: recipe ?? this.recipe,
+    );
+  }
+}
+
 class PantryItem {
   final int? id;
   final String name;
@@ -80,12 +241,14 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
   Future<void> _createDB(Database db, int version) async {
+    // Create pantry_items table
     await db.execute('''
       CREATE TABLE pantry_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,6 +259,72 @@ class DatabaseService {
         addedDate TEXT NOT NULL
       )
     ''');
+
+    // Create recipes table
+    await db.execute('''
+      CREATE TABLE recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        servings TEXT NOT NULL,
+        ingredients TEXT NOT NULL,
+        steps TEXT NOT NULL,
+        createdDate TEXT NOT NULL,
+        isFavorite INTEGER DEFAULT 0
+      )
+    ''');
+
+    // Create meal_plans table
+    await db.execute('''
+      CREATE TABLE meal_plans (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipeId INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        mealType TEXT NOT NULL,
+        notes TEXT,
+        createdDate TEXT NOT NULL,
+        FOREIGN KEY (recipeId) REFERENCES recipes (id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Create index for efficient date queries
+    await db.execute('''
+      CREATE INDEX idx_meal_plans_date ON meal_plans(date)
+    ''');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add recipes table
+      await db.execute('''
+        CREATE TABLE recipes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          servings TEXT NOT NULL,
+          ingredients TEXT NOT NULL,
+          steps TEXT NOT NULL,
+          createdDate TEXT NOT NULL,
+          isFavorite INTEGER DEFAULT 0
+        )
+      ''');
+
+      // Add meal_plans table
+      await db.execute('''
+        CREATE TABLE meal_plans (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          recipeId INTEGER NOT NULL,
+          date TEXT NOT NULL,
+          mealType TEXT NOT NULL,
+          notes TEXT,
+          createdDate TEXT NOT NULL,
+          FOREIGN KEY (recipeId) REFERENCES recipes (id) ON DELETE CASCADE
+        )
+      ''');
+
+      // Create index
+      await db.execute('''
+        CREATE INDEX idx_meal_plans_date ON meal_plans(date)
+      ''');
+    }
   }
 
   /// Create a new pantry item
@@ -184,6 +413,251 @@ class DatabaseService {
       where: 'expiryDate IS NOT NULL AND expiryDate < ?',
       whereArgs: [now],
     );
+  }
+
+  // ========== RECIPE METHODS ==========
+
+  /// Save a new recipe
+  Future<Recipe> createRecipe(Recipe recipe) async {
+    final db = await database;
+    final id = await db.insert('recipes', recipe.toMap());
+    return recipe.copyWith(id: id);
+  }
+
+  /// Get all saved recipes
+  Future<List<Recipe>> getAllRecipes() async {
+    final db = await database;
+    final result = await db.query(
+      'recipes',
+      orderBy: 'createdDate DESC',
+    );
+    return result.map((map) => Recipe.fromMap(map)).toList();
+  }
+
+  /// Get favorite recipes
+  Future<List<Recipe>> getFavoriteRecipes() async {
+    final db = await database;
+    final result = await db.query(
+      'recipes',
+      where: 'isFavorite = ?',
+      whereArgs: [1],
+      orderBy: 'createdDate DESC',
+    );
+    return result.map((map) => Recipe.fromMap(map)).toList();
+  }
+
+  /// Get recipe by ID
+  Future<Recipe?> getRecipeById(int id) async {
+    final db = await database;
+    final result = await db.query(
+      'recipes',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (result.isEmpty) return null;
+    return Recipe.fromMap(result.first);
+  }
+
+  /// Search recipes by title
+  Future<List<Recipe>> searchRecipes(String query) async {
+    final db = await database;
+    final result = await db.query(
+      'recipes',
+      where: 'title LIKE ?',
+      whereArgs: ['%$query%'],
+      orderBy: 'createdDate DESC',
+    );
+    return result.map((map) => Recipe.fromMap(map)).toList();
+  }
+
+  /// Toggle favorite status
+  Future<int> toggleRecipeFavorite(int id, bool isFavorite) async {
+    final db = await database;
+    return db.update(
+      'recipes',
+      {'isFavorite': isFavorite ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Update a recipe
+  Future<int> updateRecipe(Recipe recipe) async {
+    final db = await database;
+    return db.update(
+      'recipes',
+      recipe.toMap(),
+      where: 'id = ?',
+      whereArgs: [recipe.id],
+    );
+  }
+
+  /// Delete a recipe
+  Future<int> deleteRecipe(int id) async {
+    final db = await database;
+    return db.delete(
+      'recipes',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // ========== MEAL PLAN METHODS ==========
+
+  /// Create a meal plan
+  Future<MealPlan> createMealPlan(MealPlan mealPlan) async {
+    final db = await database;
+    final id = await db.insert('meal_plans', mealPlan.toMap());
+    return mealPlan.copyWith(id: id);
+  }
+
+  /// Get meal plans for a specific date
+  Future<List<MealPlan>> getMealPlansByDate(DateTime date) async {
+    final db = await database;
+    final dateStr = MealPlan._dateOnly(date);
+    
+    final result = await db.rawQuery('''
+      SELECT mp.*, r.*
+      FROM meal_plans mp
+      LEFT JOIN recipes r ON mp.recipeId = r.id
+      WHERE mp.date = ?
+      ORDER BY 
+        CASE mp.mealType
+          WHEN 'breakfast' THEN 1
+          WHEN 'lunch' THEN 2
+          WHEN 'dinner' THEN 3
+          WHEN 'snack' THEN 4
+        END
+    ''', [dateStr]);
+
+    return result.map((map) {
+      final mealPlan = MealPlan.fromMap({
+        'id': map['id'],
+        'recipeId': map['recipeId'],
+        'date': map['date'],
+        'mealType': map['mealType'],
+        'notes': map['notes'],
+        'createdDate': map['createdDate'],
+      });
+      
+      // Attach recipe if exists
+      if (map['title'] != null) {
+        mealPlan.recipe = Recipe.fromMap({
+          'id': map['recipeId'],
+          'title': map['title'],
+          'servings': map['servings'],
+          'ingredients': map['ingredients'],
+          'steps': map['steps'],
+          'createdDate': map['r.createdDate'] ?? map['createdDate'],
+          'isFavorite': map['isFavorite'] ?? 0,
+        });
+      }
+      
+      return mealPlan;
+    }).toList();
+  }
+
+  /// Get meal plans for a date range (e.g., week view)
+  Future<List<MealPlan>> getMealPlansByDateRange(DateTime startDate, DateTime endDate) async {
+    final db = await database;
+    final startStr = MealPlan._dateOnly(startDate);
+    final endStr = MealPlan._dateOnly(endDate);
+
+    final result = await db.rawQuery('''
+      SELECT mp.*, r.*
+      FROM meal_plans mp
+      LEFT JOIN recipes r ON mp.recipeId = r.id
+      WHERE mp.date >= ? AND mp.date <= ?
+      ORDER BY mp.date ASC, 
+        CASE mp.mealType
+          WHEN 'breakfast' THEN 1
+          WHEN 'lunch' THEN 2
+          WHEN 'dinner' THEN 3
+          WHEN 'snack' THEN 4
+        END
+    ''', [startStr, endStr]);
+
+    return result.map((map) {
+      final mealPlan = MealPlan.fromMap({
+        'id': map['id'],
+        'recipeId': map['recipeId'],
+        'date': map['date'],
+        'mealType': map['mealType'],
+        'notes': map['notes'],
+        'createdDate': map['createdDate'],
+      });
+      
+      if (map['title'] != null) {
+        mealPlan.recipe = Recipe.fromMap({
+          'id': map['recipeId'],
+          'title': map['title'],
+          'servings': map['servings'],
+          'ingredients': map['ingredients'],
+          'steps': map['steps'],
+          'createdDate': map['r.createdDate'] ?? map['createdDate'],
+          'isFavorite': map['isFavorite'] ?? 0,
+        });
+      }
+      
+      return mealPlan;
+    }).toList();
+  }
+
+  /// Update a meal plan
+  Future<int> updateMealPlan(MealPlan mealPlan) async {
+    final db = await database;
+    return db.update(
+      'meal_plans',
+      mealPlan.toMap(),
+      where: 'id = ?',
+      whereArgs: [mealPlan.id],
+    );
+  }
+
+  /// Delete a meal plan
+  Future<int> deleteMealPlan(int id) async {
+    final db = await database;
+    return db.delete(
+      'meal_plans',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Delete all meal plans for a specific date
+  Future<int> deleteMealPlansByDate(DateTime date) async {
+    final db = await database;
+    final dateStr = MealPlan._dateOnly(date);
+    return db.delete(
+      'meal_plans',
+      where: 'date = ?',
+      whereArgs: [dateStr],
+    );
+  }
+
+  /// Get aggregated ingredients from meal plans in a date range
+  Future<Map<String, String>> getAggregatedIngredients(DateTime startDate, DateTime endDate) async {
+    final mealPlans = await getMealPlansByDateRange(startDate, endDate);
+    final Map<String, String> aggregated = {};
+
+    for (final plan in mealPlans) {
+      if (plan.recipe != null) {
+        for (final ingredient in plan.recipe!.ingredients) {
+          final item = ingredient['item']!.toLowerCase();
+          final quantity = ingredient['quantity']!;
+          
+          if (aggregated.containsKey(item)) {
+            // Simple concatenation for now (could be improved with unit parsing)
+            aggregated[item] = '${aggregated[item]} + $quantity';
+          } else {
+            aggregated[item] = quantity;
+          }
+        }
+      }
+    }
+
+    return aggregated;
   }
 
   /// Close the database

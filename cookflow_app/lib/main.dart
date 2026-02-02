@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'screens/recipe_screen.dart';
 import 'screens/pantry_screen.dart';
+import 'screens/meal_plan_screen.dart';
 
 void main() {
   runApp(const CookFlowApp());
@@ -34,11 +35,13 @@ class _MainNavigatorState extends State<MainNavigator> {
   final List<Widget> _screens = const [
     RecipeScreen(),
     PantryScreen(),
+    MealPlanScreen(),
   ];
 
   final List<String> _titles = const [
     'Extract Recipe',
     'My Pantry',
+    'Meal Planning',
   ];
 
   @override
@@ -65,6 +68,10 @@ class _MainNavigatorState extends State<MainNavigator> {
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory_2),
             label: 'Pantry',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Meal Plan',
           ),
         ],
       ),

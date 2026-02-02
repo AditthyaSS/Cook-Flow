@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/database_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/json_viewer.dart';
 import '../theme.dart';
@@ -79,6 +80,43 @@ class _RecipeScreenState extends State<RecipeScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       _showError('Failed to generate grocery list: ${e.toString().replaceAll('Exception: ', '')}');
+    }
+  }
+
+  Future<void> _saveRecipe() async {
+    if (_extractedRecipe == null) return;
+
+    try {
+      final recipe = Recipe(
+        title: _extractedRecipe!.title,
+        servings: _extractedRecipe!.servings,
+        ingredients: _extractedRecipe!.ingredients,
+        steps: _extractedRecipe!.steps,
+      );
+
+      await DatabaseService.instance.createRecipe(recipe);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: AppTheme.spacingM),
+              Text('Recipe saved successfully!'),
+            ],
+          ),
+          backgroundColor: AppTheme.accentGreen,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(AppTheme.spacingM),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          ),
+        ),
+      );
+    } catch (e) {
+      _showError('Failed to save recipe: ${e.toString()}');
     }
   }
 
@@ -234,6 +272,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
                             label: const Text('Generate Grocery List'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.all(AppTheme.spacingM),
+                              backgroundColor: AppTheme.primaryOrange,
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spacingS),
+                          OutlinedButton.icon(
+                            onPressed: _isLoading ? null : _saveRecipe,
+                            icon: const Icon(Icons.bookmark),
+                            label: const Text('Save Recipe'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.all(AppTheme.spacingM),
+                              foregroundColor: AppTheme.accentGreen,
+                              side: BorderSide(color: AppTheme.accentGreen),
                             ),
                           ),
                         ],
