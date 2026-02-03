@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/database_service.dart';
+import '../utils/recipe_formatter.dart';
 import '../theme.dart';
 
 class SavedRecipesScreen extends StatefulWidget {
@@ -336,6 +338,24 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> with SingleTick
                           onPressed: () {
                             _toggleFavorite(recipe);
                             Navigator.pop(context);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share, color: AppTheme.primaryOrange),
+                          onPressed: () async {
+                            try {
+                              final formattedText = RecipeFormatter.formatRecipe(recipe);
+                              await Share.share(
+                                formattedText,
+                                subject: '🍳 ${recipe.title}',
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Failed to share: ${e.toString()}')),
+                                );
+                              }
+                            }
                           },
                         ),
                         IconButton(

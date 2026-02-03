@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/json_viewer.dart';
 import '../widgets/loading_shimmer.dart';
 import '../theme.dart';
+import '../utils/recipe_formatter.dart';
 import 'grocery_list_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
@@ -122,6 +124,20 @@ class _RecipeScreenState extends State<RecipeScreen> {
       );
     } catch (e) {
       _showError('Failed to save recipe: ${e.toString()}');
+    }
+  }
+
+  Future<void> _shareRecipe() async {
+    if (_extractedRecipe == null) return;
+
+    try {
+      final formattedText = RecipeFormatter.formatRecipeData(_extractedRecipe!);
+      await Share.share(
+        formattedText,
+        subject: '🍳 ${_extractedRecipe!.title}',
+      );
+    } catch (e) {
+      _showError('Failed to share recipe: ${e.toString()}');
     }
   }
 
@@ -295,6 +311,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
                               padding: const EdgeInsets.all(AppTheme.spacingM),
                               foregroundColor: AppTheme.accentGreen,
                               side: BorderSide(color: AppTheme.accentGreen),
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spacingS),
+                          OutlinedButton.icon(
+                            onPressed: _isLoading ? null : _shareRecipe,
+                            icon: const Icon(Icons.share),
+                            label: const Text('Share Recipe'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.all(AppTheme.spacingM),
+                              foregroundColor: AppTheme.primaryOrange,
+                              side: BorderSide(color: AppTheme.primaryOrange),
                             ),
                           ),
                         ],
