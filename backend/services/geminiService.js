@@ -9,11 +9,15 @@ Return ONLY valid JSON with this exact schema:
 {
   "title": string,
   "servings": string or number,
+  "prep_time_minutes": number (estimate prep time in minutes),
+  "cook_time_minutes": number (estimate cooking time in minutes),
   "ingredients": [
     { "quantity": string, "item": string }
   ],
   "steps": [string]
 }
+Estimate prep_time_minutes based on ingredient preparation complexity.
+Estimate cook_time_minutes based on cooking methods mentioned in steps.
 No markdown.
 No explanation.
 No extra text.`;

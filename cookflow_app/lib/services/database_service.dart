@@ -10,6 +10,8 @@ class Recipe {
   final List<String> steps;
   final DateTime createdDate;
   final bool isFavorite;
+  final int? prepTimeMinutes;
+  final int? cookTimeMinutes;
 
   Recipe({
     this.id,
@@ -19,6 +21,8 @@ class Recipe {
     required this.steps,
     DateTime? createdDate,
     this.isFavorite = false,
+    this.prepTimeMinutes,
+    this.cookTimeMinutes,
   }) : createdDate = createdDate ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -30,6 +34,8 @@ class Recipe {
       'steps': _encodeSteps(steps),
       'createdDate': createdDate.toIso8601String(),
       'isFavorite': isFavorite ? 1 : 0,
+      'prepTimeMinutes': prepTimeMinutes,
+      'cookTimeMinutes': cookTimeMinutes,
     };
   }
 
@@ -42,6 +48,8 @@ class Recipe {
       steps: _decodeSteps(map['steps'] as String),
       createdDate: DateTime.parse(map['createdDate'] as String),
       isFavorite: (map['isFavorite'] as int) == 1,
+      prepTimeMinutes: map['prepTimeMinutes'] as int?,
+      cookTimeMinutes: map['cookTimeMinutes'] as int?,
     );
   }
 
@@ -79,6 +87,8 @@ class Recipe {
     List<String>? steps,
     DateTime? createdDate,
     bool? isFavorite,
+    int? prepTimeMinutes,
+    int? cookTimeMinutes,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -88,6 +98,8 @@ class Recipe {
       steps: steps ?? this.steps,
       createdDate: createdDate ?? this.createdDate,
       isFavorite: isFavorite ?? this.isFavorite,
+      prepTimeMinutes: prepTimeMinutes ?? this.prepTimeMinutes,
+      cookTimeMinutes: cookTimeMinutes ?? this.cookTimeMinutes,
     );
   }
 }
@@ -241,7 +253,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -269,7 +281,9 @@ class DatabaseService {
         ingredients TEXT NOT NULL,
         steps TEXT NOT NULL,
         createdDate TEXT NOT NULL,
-        isFavorite INTEGER DEFAULT 0
+        isFavorite INTEGER DEFAULT 0,
+        prepTimeMinutes INTEGER,
+        cookTimeMinutes INTEGER
       )
     ''');
 
@@ -323,6 +337,16 @@ class DatabaseService {
       // Create index
       await db.execute('''
         CREATE INDEX idx_meal_plans_date ON meal_plans(date)
+      ''');
+    }
+    
+    if (oldVersion < 3) {
+      // Add time fields to recipes table
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN prepTimeMinutes INTEGER
+      ''');
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN cookTimeMinutes INTEGER
       ''');
     }
   }

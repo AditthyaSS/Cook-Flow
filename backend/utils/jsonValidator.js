@@ -23,6 +23,20 @@ function validateRecipeJSON(recipe) {
     errors.push('Servings must be a string or number');
   }
 
+  // Validate prep_time_minutes (optional)
+  if (recipe.prep_time_minutes !== undefined && recipe.prep_time_minutes !== null) {
+    if (typeof recipe.prep_time_minutes !== 'number' || recipe.prep_time_minutes < 0) {
+      errors.push('prep_time_minutes must be a non-negative number');
+    }
+  }
+
+  // Validate cook_time_minutes (optional)
+  if (recipe.cook_time_minutes !== undefined && recipe.cook_time_minutes !== null) {
+    if (typeof recipe.cook_time_minutes !== 'number' || recipe.cook_time_minutes < 0) {
+      errors.push('cook_time_minutes must be a non-negative number');
+    }
+  }
+
   // Validate ingredients
   if (!Array.isArray(recipe.ingredients)) {
     errors.push('Ingredients must be an array');
@@ -30,7 +44,7 @@ function validateRecipeJSON(recipe) {
     if (recipe.ingredients.length === 0) {
       errors.push('Ingredients array cannot be empty');
     }
-    
+
     recipe.ingredients.forEach((ingredient, index) => {
       if (!ingredient || typeof ingredient !== 'object') {
         errors.push(`Ingredient at index ${index} must be an object`);
@@ -52,7 +66,7 @@ function validateRecipeJSON(recipe) {
     if (recipe.steps.length === 0) {
       errors.push('Steps array cannot be empty');
     }
-    
+
     recipe.steps.forEach((step, index) => {
       if (typeof step !== 'string' || step.trim() === '') {
         errors.push(`Step at index ${index} must be a non-empty string`);

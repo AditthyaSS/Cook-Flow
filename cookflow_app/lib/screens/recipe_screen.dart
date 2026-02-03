@@ -90,9 +90,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
     try {
       final recipe = Recipe(
         title: _extractedRecipe!.title,
-        servings: _extractedRecipe!.servings,
-        ingredients: _extractedRecipe!.ingredients,
+        servings: _extractedRecipe!.servings.toString(),
+        ingredients: _extractedRecipe!.ingredients
+            .map((ing) => {'quantity': ing.quantity, 'item': ing.item})
+            .toList(),
         steps: _extractedRecipe!.steps,
+        prepTimeMinutes: _extractedRecipe!.prepTimeMinutes,
+        cookTimeMinutes: _extractedRecipe!.cookTimeMinutes,
       );
 
       await DatabaseService.instance.createRecipe(recipe);

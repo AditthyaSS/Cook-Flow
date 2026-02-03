@@ -239,6 +239,31 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> with SingleTick
                         ),
                       ],
                     ),
+                    // Time info
+                    if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (recipe.prepTimeMinutes != null) ...[
+                            Icon(Icons.schedule, size: 14, color: AppTheme.primaryOrange),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${recipe.prepTimeMinutes}m prep',
+                              style: TextStyle(color: AppTheme.textMedium, fontSize: 12),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          if (recipe.cookTimeMinutes != null) ...[
+                            Icon(Icons.timer, size: 14, color: AppTheme.accentGreen),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${recipe.cookTimeMinutes}m cook',
+                              style: TextStyle(color: AppTheme.textMedium, fontSize: 12),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

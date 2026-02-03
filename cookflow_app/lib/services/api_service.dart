@@ -10,12 +10,16 @@ class RecipeData {
   final dynamic servings;
   final List<Ingredient> ingredients;
   final List<String> steps;
+  final int? prepTimeMinutes;
+  final int? cookTimeMinutes;
 
   RecipeData({
     required this.title,
     required this.servings,
     required this.ingredients,
     required this.steps,
+    this.prepTimeMinutes,
+    this.cookTimeMinutes,
   });
 
   factory RecipeData.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class RecipeData {
           .map((i) => Ingredient.fromJson(i as Map<String, dynamic>))
           .toList(),
       steps: (json['steps'] as List).map((s) => s as String).toList(),
+      prepTimeMinutes: json['prep_time_minutes'] as int?,
+      cookTimeMinutes: json['cook_time_minutes'] as int?,
     );
   }
 
@@ -35,6 +41,8 @@ class RecipeData {
       'servings': servings,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'steps': steps,
+      'prep_time_minutes': prepTimeMinutes,
+      'cook_time_minutes': cookTimeMinutes,
     };
   }
 }

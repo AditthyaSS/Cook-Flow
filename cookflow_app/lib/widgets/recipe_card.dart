@@ -57,6 +57,8 @@ class RecipeCard extends StatelessWidget {
               ],
             ),
             
+            // Time Information Badges
+            if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null) ...[\n              const SizedBox(height: AppTheme.spacingM),\n              Wrap(\n                spacing: AppTheme.spacingS,\n                runSpacing: AppTheme.spacingS,\n                children: [\n                  if (recipe.prepTimeMinutes != null)\n                    _buildTimeBadge(\n                      context,\n                      Icons.schedule,\n                      'Prep: ${recipe.prepTimeMinutes} min',\n                      AppTheme.primaryOrange,\n                    ),\n                  if (recipe.cookTimeMinutes != null)\n                    _buildTimeBadge(\n                      context,\n                      Icons.timer,\n                      'Cook: ${recipe.cookTimeMinutes} min',\n                      AppTheme.accentGreen,\n                    ),\n                  if (recipe.prepTimeMinutes != null && recipe.cookTimeMinutes != null)\n                    _buildTimeBadge(\n                      context,\n                      Icons.access_time,\n                      'Total: ${recipe.prepTimeMinutes! + recipe.cookTimeMinutes!} min',\n                      AppTheme.textMedium,\n                    ),\n                ],\n              ),\n            ],\n            
             const SizedBox(height: AppTheme.spacingL),
             
             // Ingredients Section
@@ -156,6 +158,34 @@ class RecipeCard extends StatelessWidget {
             }),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimeBadge(BuildContext context, IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingM,
+        vertical: AppTheme.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: AppTheme.spacingS),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
       ),
     );
   }
