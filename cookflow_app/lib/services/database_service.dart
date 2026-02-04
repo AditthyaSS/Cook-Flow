@@ -12,6 +12,10 @@ class Recipe {
   final bool isFavorite;
   final int? prepTimeMinutes;
   final int? cookTimeMinutes;
+  final String? difficulty;
+  final String? cuisine;
+  final List<String>? tags;
+  final String? notes;
 
   Recipe({
     this.id,
@@ -23,6 +27,10 @@ class Recipe {
     this.isFavorite = false,
     this.prepTimeMinutes,
     this.cookTimeMinutes,
+    this.difficulty,
+    this.cuisine,
+    this.tags,
+    this.notes,
   }) : createdDate = createdDate ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -36,6 +44,10 @@ class Recipe {
       'isFavorite': isFavorite ? 1 : 0,
       'prepTimeMinutes': prepTimeMinutes,
       'cookTimeMinutes': cookTimeMinutes,
+      'difficulty': difficulty,
+      'cuisine': cuisine,
+      'tags': tags != null ? _encodeTags(tags!) : null,
+      'notes': notes,
     };
   }
 
@@ -50,6 +62,10 @@ class Recipe {
       isFavorite: (map['isFavorite'] as int) == 1,
       prepTimeMinutes: map['prepTimeMinutes'] as int?,
       cookTimeMinutes: map['cookTimeMinutes'] as int?,
+      difficulty: map['difficulty'] as String?,
+      cuisine: map['cuisine'] as String?,
+      tags: map['tags'] != null ? _decodeTags(map['tags'] as String) : null,
+      notes: map['notes'] as String?,
     );
   }
 
@@ -79,6 +95,17 @@ class Recipe {
     return encoded.split('|||');
   }
 
+  // Encode tags list as stored string
+  static String _encodeTags(List<String> tags) {
+    return tags.join('|||');
+  }
+
+  // Decode tags string to list
+  static List<String> _decodeTags(String encoded) {
+    if (encoded.isEmpty) return [];
+    return encoded.split('|||');
+  }
+
   Recipe copyWith({
     int? id,
     String? title,
@@ -89,6 +116,10 @@ class Recipe {
     bool? isFavorite,
     int? prepTimeMinutes,
     int? cookTimeMinutes,
+    String? difficulty,
+    String? cuisine,
+    List<String>? tags,
+    String? notes,
   }) {
     return Recipe(
       id: id ?? this.id,
@@ -100,6 +131,10 @@ class Recipe {
       isFavorite: isFavorite ?? this.isFavorite,
       prepTimeMinutes: prepTimeMinutes ?? this.prepTimeMinutes,
       cookTimeMinutes: cookTimeMinutes ?? this.cookTimeMinutes,
+      difficulty: difficulty ?? this.difficulty,
+      cuisine: cuisine ?? this.cuisine,
+      tags: tags ?? this.tags,
+      notes: notes ?? this.notes,
     );
   }
 }
@@ -253,7 +288,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -283,7 +318,11 @@ class DatabaseService {
         createdDate TEXT NOT NULL,
         isFavorite INTEGER DEFAULT 0,
         prepTimeMinutes INTEGER,
-        cookTimeMinutes INTEGER
+        cookTimeMinutes INTEGER,
+        difficulty TEXT,
+        cuisine TEXT,
+        tags TEXT,
+        notes TEXT
       )
     ''');
 
@@ -347,6 +386,22 @@ class DatabaseService {
       ''');
       await db.execute('''
         ALTER TABLE recipes ADD COLUMN cookTimeMinutes INTEGER
+      ''');
+    }
+    
+    if (oldVersion < 4) {
+      // Add new metadata fields to recipes table
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN difficulty TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN cuisine TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN tags TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE recipes ADD COLUMN notes TEXT
       ''');
     }
   }

@@ -12,6 +12,10 @@ class RecipeData {
   final List<String> steps;
   final int? prepTimeMinutes;
   final int? cookTimeMinutes;
+  final String? difficulty;
+  final String? cuisine;
+  final List<String>? tags;
+  final String? notes;
 
   RecipeData({
     required this.title,
@@ -20,6 +24,10 @@ class RecipeData {
     required this.steps,
     this.prepTimeMinutes,
     this.cookTimeMinutes,
+    this.difficulty,
+    this.cuisine,
+    this.tags,
+    this.notes,
   });
 
   factory RecipeData.fromJson(Map<String, dynamic> json) {
@@ -32,6 +40,12 @@ class RecipeData {
       steps: (json['steps'] as List).map((s) => s as String).toList(),
       prepTimeMinutes: json['prep_time_minutes'] as int?,
       cookTimeMinutes: json['cook_time_minutes'] as int?,
+      difficulty: json['difficulty'] as String?,
+      cuisine: json['cuisine'] as String?,
+      tags: json['tags'] != null 
+          ? (json['tags'] as List).map((t) => t as String).toList() 
+          : null,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -43,6 +57,10 @@ class RecipeData {
       'steps': steps,
       'prep_time_minutes': prepTimeMinutes,
       'cook_time_minutes': cookTimeMinutes,
+      'difficulty': difficulty,
+      'cuisine': cuisine,
+      'tags': tags,
+      'notes': notes,
     };
   }
 }
@@ -65,6 +83,32 @@ class Ingredient {
       'quantity': quantity,
       'item': item,
     };
+  }
+}
+
+// ============================================================================
+// EXTRACTION METADATA (Phase 2 Enhancement)
+// ============================================================================
+
+class ExtractionMetadata {
+  final double qualityScore;
+  final List<String> warnings;
+  final int extractionTimeMs;
+
+  ExtractionMetadata({
+    required this.qualityScore,
+    required this.warnings,
+    required this.extractionTimeMs,
+  });
+
+  factory ExtractionMetadata.fromJson(Map<String, dynamic> json) {
+    return ExtractionMetadata(
+      qualityScore: (json['quality_score'] as num?)?.toDouble() ?? 0.0,
+      warnings: json['warnings'] != null
+          ? (json['warnings'] as List).map((w) => w as String).toList()
+          : [],
+      extractionTimeMs: json['extraction_time_ms'] as int? ?? 0,
+    );
   }
 }
 
@@ -180,7 +224,7 @@ class ApiService {
   static const String baseUrl = 'http://10.0.2.2:3000';
 
   /// Extract recipe from raw text (Phase 1)
-  static Future<RecipeData> extractRecipe(String rawText) async {
+  static Future<Map<String, dynamic>> extractRecipe(String rawText) async {
     if (rawText.trim().length < 50) {
       throw Exception('Recipe text must be at least 50 characters');
     }
@@ -203,7 +247,16 @@ class ApiService {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['success'] == true && jsonResponse['data'] != null) {
-          return RecipeData.fromJson(jsonResponse['data']);
+          return {
+            'recipe': RecipeData.fromJson(jsonResponse['data']),
+            'metadata': jsonResponse['metadata'] != null
+                ? ExtractionMetadata.fromJson(jsonResponse['metadata'])
+                : ExtractionMetadata(
+                    qualityScore: 1.0,
+                    warnings: [],
+                    extractionTimeMs: 0,
+                  ),
+          };
         } else {
           throw Exception(jsonResponse['error'] ?? 'Failed to extract recipe');
         }

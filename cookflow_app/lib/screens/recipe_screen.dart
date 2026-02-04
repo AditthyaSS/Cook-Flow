@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
@@ -7,6 +8,7 @@ import '../widgets/json_viewer.dart';
 import '../widgets/loading_shimmer.dart';
 import '../theme.dart';
 import '../utils/recipe_formatter.dart';
+import '../utils/recipe_examples.dart';
 import 'grocery_list_screen.dart';
 
 class RecipeScreen extends StatefulWidget {
@@ -20,6 +22,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   final TextEditingController _textController = TextEditingController();
   bool _isLoading = false;
   RecipeData? _extractedRecipe;
+  ExtractionMetadata? _extractionMetadata;
   String? _errorMessage;
 
   @override
@@ -45,12 +48,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
       _isLoading = true;
       _errorMessage = null;
       _extractedRecipe = null;
+      _extractionMetadata = null;
     });
 
     try {
-      final recipe = await ApiService.extractRecipe(rawText);
+      final result = await ApiService.extractRecipe(rawText);
       setState(() {
-        _extractedRecipe = recipe;
+        _extractedRecipe = result['recipe'] as RecipeData;
+        _extractionMetadata = result['metadata'] as ExtractionMetadata;
         _isLoading = false;
       });
     } catch (e) {
@@ -60,6 +65,58 @@ class _RecipeScreenState extends State<RecipeScreen> {
       });
       _showError(_errorMessage!);
     }
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    try {
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      if (clipboardData != null && clipboardData.text != null) {
+        setState(() {
+          _textController.text = clipboardData.text!;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: AppTheme.spacingM),
+                Text('Pasted from clipboard'),
+              ],
+            ),
+            backgroundColor: AppTheme.accentGreen,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
+            margin: const EdgeInsets.all(AppTheme.spacingM),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      _showError('Failed to paste from clipboard');
+    }
+  }
+
+  void _loadExample(int index) {
+    setState(() {
+      _textController.text = RecipeExamples.getExample(index);
+      _extractedRecipe = null;
+      _extractionMetadata = null;
+      _errorMessage = null;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Loaded: ${RecipeExamples.getExampleName(index)}'),
+        backgroundColor: AppTheme.primaryOrange,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 1),
+        margin: const EdgeInsets.all(AppTheme.spacingM),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        ),
+      ),
+    );
   }
 
   Future<void> _generateGroceryList() async {
@@ -99,6 +156,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
         steps: _extractedRecipe!.steps,
         prepTimeMinutes: _extractedRecipe!.prepTimeMinutes,
         cookTimeMinutes: _extractedRecipe!.cookTimeMinutes,
+        difficulty: _extractedRecipe!.difficulty,
+        cuisine: _extractedRecipe!.cuisine,
+        tags: _extractedRecipe!.tags,
+        notes: _extractedRecipe!.notes,
       );
 
       await DatabaseService.instance.createRecipe(recipe);
@@ -218,9 +279,38 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          'Recipe Text',
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recipe Text',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            Row(
+                              children: [
+                                // Try Example button
+                                PopupMenuButton<int>(
+                                  icon: Icon(Icons.lightbulb, color: AppTheme.primaryOrange),
+                                  tooltip: 'Try Example Recipe',
+                                  onSelected: _loadExample,
+                                  itemBuilder: (context) => List.generate(
+                                    RecipeExamples.count,
+                                    (index) => PopupMenuItem(
+                                      value: index,
+                                      child: Text(RecipeExamples.getExampleName(index)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppTheme.spacingS),
+                                // Paste button
+                                IconButton(
+                                  icon: Icon(Icons.content_paste, color: AppTheme.accentGreen),
+                                  tooltip: 'Paste from Clipboard',
+                                  onPressed: _pasteFromClipboard,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                         const SizedBox(height: AppTheme.spacingM),
                         TextField(
@@ -268,7 +358,61 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 
                 const SizedBox(height: AppTheme.spacingL),
                 
-                // Results Section with Shimmer Loading
+                // Quality Score and Warnings (if available)
+                if (_extractionMetadata != null && _extractedRecipe != null) ...[
+                  Card(
+                    color: _extractionMetadata!.qualityScore >= 0.8 
+                        ? Colors.green.shade50 
+                        : _extractionMetadata!.qualityScore >= 0.6
+                            ? Colors.orange.shade50
+                            : Colors.red.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.spacingM),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                _extractionMetadata!.qualityScore >= 0.8
+                                    ? Icons.check_circle
+                                    : Icons.info,
+                                color: _extractionMetadata!.qualityScore >= 0.8
+                                    ? AppTheme.accentGreen
+                                    : AppTheme.primaryOrange,
+                              ),
+                              const SizedBox(width: AppTheme.spacingS),
+                              Text(
+                                'Quality: ${(_extractionMetadata!.qualityScore * 100).toInt()}%',
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_extractionMetadata!.warnings.isNotEmpty) ...[
+                            const SizedBox(height: AppTheme.spacingS),
+                            Wrap(
+                              spacing: AppTheme.spacingS,
+                              runSpacing: AppTheme.spacingS,
+                              children: _extractionMetadata!.warnings.map((warning) {
+                                return Chip(
+                                  label: Text(
+                                    warning,
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  backgroundColor: Colors.orange.shade100,
+                                  padding: const EdgeInsets.all(4),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingL),
+                ],
                 if (_isLoading) ...[
                   Shimmer.fromColors(
                     baseColor: Colors.grey[300]!,
