@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'theme.dart';
+import 'providers/theme_provider.dart';
 import 'screens/recipe_screen.dart';
 import 'screens/pantry_screen.dart';
 import 'screens/meal_plan_screen.dart';
@@ -9,6 +11,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/saved_recipes_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
+import 'screens/settings_screen.dart';
 import 'services/auth_service.dart';
 
 void main() async {
@@ -17,7 +20,12 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
   
-  runApp(const CookFlowApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const CookFlowApp(),
+    ),
+  );
 }
 
 class CookFlowApp extends StatelessWidget {
@@ -25,16 +33,23 @@ class CookFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CookFlow',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const AppInitializer(),
-      routes: {
-        '/home': (context) => const MainNavigator(),
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          title: 'CookFlow',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          home: const AppInitializer(),
+          routes: {
+            '/home': (context) => const MainNavigator(),
+            '/onboarding': (context) => const OnboardingScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/signup': (context) => const SignupScreen(),
+            '/settings': (context) => const SettingsScreen(),
+          },
+        );
       },
     );
   }
@@ -80,7 +95,7 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -148,8 +163,8 @@ class _MainNavigatorState extends State<MainNavigator> {
             _currentIndex = index;
           });
         },
-        selectedItemColor: AppTheme.primaryOrange,
-        unselectedItemColor: AppTheme.textMedium,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).textTheme.bodyMedium?.color,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(

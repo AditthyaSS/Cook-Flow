@@ -229,11 +229,20 @@ class _RecipeScreenState extends State<RecipeScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.restaurant_menu, color: AppTheme.primaryOrange),
+            Icon(Icons.restaurant_menu, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: AppTheme.spacingS),
             const Text('CookFlow'),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
