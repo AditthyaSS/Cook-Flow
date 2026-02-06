@@ -51,6 +51,16 @@ class UserProfileMenu extends StatelessWidget {
           ),
         ),
         const PopupMenuItem(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(Icons.person),
+              SizedBox(width: 12),
+              Text('My Profile'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
           value: 'settings',
           child: Row(
             children: [
@@ -73,6 +83,9 @@ class UserProfileMenu extends StatelessWidget {
       ],
       onSelected: (value) async {
         switch (value) {
+          case 'profile':
+            Navigator.pushNamed(context, '/profile');
+            break;
           case 'settings':
             Navigator.pushNamed(context, '/settings');
             break;

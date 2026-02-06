@@ -1,0 +1,541 @@
+import 'package:flutter/material.dart';
+import 'package:cookflow_app/services/auth_service.dart';
+import 'package:cookflow_app/theme.dart';
+
+/// User Profile Screen
+/// Displays account details, settings, and subscription information
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final user = AuthService.instance.currentUser;
+
+  @override
+  Widget build(BuildContext context) {
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+        body: const Center(
+          child: Text('Please sign in to view your profile'),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Edit Profile',
+            onPressed: _editProfile,
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          // User Header Section
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingXL),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    (user.displayName?.substring(0, 1) ?? user.email?.substring(0, 1) ?? 'U').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacingM),
+                Text(
+                  user.displayName ?? 'User',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: AppTheme.spacingS),
+                Text(
+                  user.email ?? '',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                ),
+                const SizedBox(height: AppTheme.spacingM),
+                _buildAccountBadge(),
+              ],
+            ),
+          ),
+
+          // Account Information
+          _buildSection(
+            'Account Information',
+            [
+              _buildInfoTile(
+                Icons.email,
+                'Email',
+                user.email ?? 'Not set',
+                subtitle: user.emailVerified ? 'Verified' : 'Not verified',
+                trailing: user.emailVerified
+                    ? const Icon(Icons.verified, color: Colors.green, size: 20)
+                    : TextButton(
+                        onPressed: _sendVerificationEmail,
+                        child: const Text('Verify'),
+                      ),
+              ),
+              _buildInfoTile(
+                Icons.phone,
+                'Phone',
+                user.phoneNumber ?? 'Not set',
+              ),
+              _buildInfoTile(
+                Icons.calendar_today,
+                'Member Since',
+                _formatDate(user.metadata.creationTime),
+              ),
+              _buildInfoTile(
+                Icons.login,
+                'Last Sign In',
+                _formatDate(user.metadata.lastSignInTime),
+              ),
+            ],
+          ),
+
+          // Subscription Section
+          _buildSection(
+            'Subscription',
+            [
+              _buildSubscriptionCard(),
+            ],
+          ),
+
+          // Settings & Preferences
+          _buildSection(
+            'Settings & Preferences',
+            [
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('App Settings'),
+                subtitle: const Text('Theme, notifications, and more'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pushNamed(context, '/settings'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications),
+                title: const Text('Notifications'),
+                subtitle: const Text('Manage notification preferences'),
+                trailing: Switch(
+                  value: true, // Placeholder
+                  onChanged: (value) {
+                    // TODO: Implement notification toggle
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          // Account Actions
+          _buildSection(
+            'Account Actions',
+            [
+              ListTile(
+                leading: const Icon(Icons.lock, color: Colors.orange),
+                title: const Text('Change Password'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _changePassword,
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Sign Out'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _signOut,
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text(
+                  'Delete Account',
+                  style: TextStyle(color: Colors.red),
+                ),
+                trailing: const Icon(Icons.chevron_right, color: Colors.red),
+                onTap: _deleteAccount,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppTheme.spacingXL),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingM,
+        vertical: AppTheme.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.workspace_premium, color: Colors.white, size: 20),
+          const SizedBox(width: AppTheme.spacingS),
+          Text(
+            'Free Plan', // Will be dynamic when Phase 4 is implemented
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppTheme.spacingM,
+            AppTheme.spacingL,
+            AppTheme.spacingM,
+            AppTheme.spacingS,
+          ),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoTile(
+    IconData icon,
+    String title,
+    String value, {
+    String? subtitle,
+    Widget? trailing,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(value),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: subtitle.contains('Verified')
+                    ? Colors.green
+                    : Theme.of(context).textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ],
+      ),
+      trailing: trailing,
+    );
+  }
+
+  Widget _buildSubscriptionCard() {
+    // Placeholder for Phase 4 - RevenueCat integration
+    return Container(
+      margin: const EdgeInsets.all(AppTheme.spacingM),
+      padding: const EdgeInsets.all(AppTheme.spacingL),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryOrange.withOpacity(0.1),
+            AppTheme.accentGreen.withOpacity(0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.workspace_premium,
+                color: Theme.of(context).colorScheme.primary,
+                size: 32,
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Free Plan',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    Text(
+                      'Enjoy all basic features',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingL),
+          const Text('✓ Unlimited recipe extraction'),
+          const SizedBox(height: AppTheme.spacingS),
+          const Text('✓ Cloud sync across devices'),
+          const SizedBox(height: AppTheme.spacingS),
+          const Text('✓ AI-powered grocery lists'),
+          const SizedBox(height: AppTheme.spacingL),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                _showUpgradeDialog();
+              },
+              icon: const Icon(Icons.star),
+              label: const Text('Upgrade to Premium'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return '$months month${months > 1 ? 's' : ''} ago';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return '$years year${years > 1 ? 's' : ''} ago';
+    }
+  }
+
+  void _editProfile() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: const Text('Profile editing coming soon!\n\nYou\'ll be able to update your name, photo, and other details.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendVerificationEmail() async {
+    try {
+      await user?.sendEmailVerification();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification email sent!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _changePassword() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Change Password'),
+        content: const Text('A password reset email will be sent to your email address.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await AuthService.instance.resetPassword(user!.email!);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password reset email sent!')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Send Email'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _signOut() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      await AuthService.instance.signOut();
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      }
+    }
+  }
+
+  void _deleteAccount() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account?\n\n'
+          'This action is PERMANENT and cannot be undone.\n\n'
+          'All your recipes, pantry items, and data will be deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete Forever', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        // TODO: Implement account deletion
+        // This should delete Firestore data, then delete the auth account
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account deletion is not yet implemented'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.toString()}')),
+          );
+        }
+      }
+    }
+  }
+
+  void _showUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.star, color: Colors.amber),
+            SizedBox(width: 8),
+            Text('Upgrade to Premium'),
+          ],
+        ),
+        content: const Text(
+          'Premium features coming soon in Phase 4!\n\n'
+          'Premium will include:\n'
+          '• Unlimited meal plans\n'
+          '• Advanced pantry analytics\n'
+          '• Priority support\n'
+          '• Ad-free experience\n'
+          '• And more!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Maybe Later'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Notify Me'),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -12,6 +12,7 @@ import 'screens/saved_recipes_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/profile_screen.dart';
 import 'services/auth_service.dart';
 
 void main() async {
@@ -48,6 +49,7 @@ class CookFlowApp extends StatelessWidget {
             '/login': (context) => const LoginScreen(),
             '/signup': (context) => const SignupScreen(),
             '/settings': (context) => const SettingsScreen(),
+            '/profile': (context) => const ProfileScreen(),
           },
         );
       },
