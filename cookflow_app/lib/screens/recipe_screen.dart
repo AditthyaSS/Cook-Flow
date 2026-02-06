@@ -6,6 +6,7 @@ import '../services/database_service.dart';
 import '../widgets/recipe_card.dart';
 import '../widgets/json_viewer.dart';
 import '../widgets/loading_shimmer.dart';
+import '../widgets/user_profile_menu.dart';
 import '../theme.dart';
 import '../utils/recipe_formatter.dart';
 import '../utils/recipe_examples.dart';
@@ -234,14 +235,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
             const Text('CookFlow'),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
+        actions: const [
+          UserProfileMenu(),
         ],
       ),
       body: SafeArea(
