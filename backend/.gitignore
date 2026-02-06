@@ -4,6 +4,9 @@ node_modules/
 # Environment variables
 .env
 
+# Firebase credentials (NEVER COMMIT!)
+firebase-service-account.json
+
 # Logs
 logs/
 *.log

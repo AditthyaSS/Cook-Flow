@@ -4,6 +4,9 @@ const cors = require('cors');
 const extractRouter = require('./routes/extract');
 const groceryRouter = require('./routes/grocery');
 
+// Initialize Firebase Admin SDK
+require('./config/firebase-admin-init');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'auth_service.dart';
 
 // ============================================================================
 // RECIPE DATA MODELS (Phase 1)
@@ -223,6 +224,19 @@ class ApiService {
   // For local testing: 'http://localhost:3000' (iOS simulator/web)
   static const String baseUrl = 'http://10.0.2.2:3000';
 
+  /// Get auth headers with Firebase ID token
+  static Future<Map<String, String>> _getAuthHeaders() async {
+    final headers = {'Content-Type': 'application/json'};
+    
+    // Add Firebase ID token if user is authenticated
+    final idToken = await AuthService.instance.getIdToken();
+    if (idToken != null) {
+      headers['Authorization'] = 'Bearer $idToken';
+    }
+    
+    return headers;
+  }
+
   /// Extract recipe from raw text (Phase 1)
   static Future<Map<String, dynamic>> extractRecipe(String rawText) async {
     if (rawText.trim().length < 50) {
@@ -230,10 +244,11 @@ class ApiService {
     }
 
     try {
+      final headers = await _getAuthHeaders();
       final response = await http
           .post(
             Uri.parse('$baseUrl/extract-recipe'),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: jsonEncode({'raw_text': rawText}),
           )
           .timeout(
@@ -286,10 +301,11 @@ class ApiService {
     }
 
     try {
+      final headers = await _getAuthHeaders();
       final response = await http
           .post(
             Uri.parse('$baseUrl/generate-grocery-list'),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: jsonEncode({
               'recipes': recipes.map((r) => r.toJson()).toList(),
               'options': {'aggregate': aggregate},
@@ -337,10 +353,11 @@ class ApiService {
     }
 
     try {
+      final headers = await _getAuthHeaders();
       final response = await http
           .post(
             Uri.parse('$baseUrl/generate-affiliate-links'),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: jsonEncode({
               'groceryItems': items.map((i) => i.toJson()).toList(),
               'network': network,

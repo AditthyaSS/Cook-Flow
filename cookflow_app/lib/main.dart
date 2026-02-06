@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'theme.dart';
 import 'screens/recipe_screen.dart';
 import 'screens/pantry_screen.dart';
 import 'screens/meal_plan_screen.dart';
 import 'screens/onboarding_screen.dart';
-
 import 'screens/saved_recipes_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'services/auth_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  
   runApp(const CookFlowApp());
 }
 
@@ -25,6 +33,8 @@ class CookFlowApp extends StatelessWidget {
       routes: {
         '/home': (context) => const MainNavigator(),
         '/onboarding': (context) => const OnboardingScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
       },
     );
   }
@@ -49,10 +59,20 @@ class _AppInitializerState extends State<AppInitializer> {
     final hasSeenOnboarding = prefs.getBool('onboarding_completed') ?? false;
     
     if (mounted) {
-      if (hasSeenOnboarding) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else {
+      if (!hasSeenOnboarding) {
+        // Show onboarding first
         Navigator.of(context).pushReplacementNamed('/onboarding');
+      } else {
+        // Check authentication status
+        final isAuthenticated = AuthService.instance.isAuthenticated;
+        
+        if (isAuthenticated) {
+          // User is logged in → go to home
+          Navigator.of(context).pushReplacementNamed('/home');
+        } else {
+          // User needs to log in
+          Navigator.of(context).pushReplacementNamed('/login');
+        }
       }
     }
   }

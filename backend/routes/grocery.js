@@ -1,6 +1,7 @@
 const express = require('express');
 const { generateGroceryList } = require('../services/groceryService');
 const { generateAffiliateLinks, getAvailableNetworks } = require('../services/affiliateService');
+const { authenticateUser } = require('../middleware/auth-middleware');
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * POST /generate-grocery-list
  * Generate categorized grocery list from recipes
  */
-router.post('/generate-grocery-list', async (req, res) => {
+router.post('/generate-grocery-list', authenticateUser, async (req, res) => {
     try {
         const { recipes, options } = req.body;
 
@@ -58,7 +59,7 @@ router.post('/generate-grocery-list', async (req, res) => {
  * POST /generate-affiliate-links
  * Generate affiliate purchase links for grocery items
  */
-router.post('/generate-affiliate-links', async (req, res) => {
+router.post('/generate-affiliate-links', authenticateUser, async (req, res) => {
     try {
         const { groceryItems, network } = req.body;
 

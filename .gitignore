@@ -10,3 +10,16 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Environment variables (contains sensitive keys)
+.env
+.env.local
+.env.production
+
+# Firebase Admin SDK credentials (NEVER COMMIT!)
+backend/firebase-service-account.json
+
+# DO NOT IGNORE - These files should be committed:
+# backend/.env.example (template)
+# cookflow_app/android/app/google-services.json (Firebase Android config)
+# cookflow_app/ios/Runner/GoogleService-Info.plist (Firebase iOS config)

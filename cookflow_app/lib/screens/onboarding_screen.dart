@@ -47,7 +47,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/home');
+      // Navigate to login screen instead of home (Phase 3: Auth required)
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 

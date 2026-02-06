@@ -1,5 +1,6 @@
 const express = require('express');
 const { extractRecipe } = require('../services/geminiService');
+const { authenticateUser } = require('../middleware/auth-middleware');
 
 const router = express.Router();
 
@@ -7,7 +8,7 @@ const router = express.Router();
  * POST /extract-recipe
  * Extract recipe from raw text input
  */
-router.post('/extract-recipe', async (req, res) => {
+router.post('/extract-recipe', authenticateUser, async (req, res) => {
     try {
         const { raw_text } = req.body;
 
