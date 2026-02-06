@@ -1,6 +1,6 @@
 <div align="center">
 
-![CookFlow Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=200&section=header&text=CookFlow&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=fff)
+![CookFlow Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,1,2,3,4&height=200&section=header&text=CookFlow&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=fff)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Node.js](https://img.shields.io/badge/Node.js-16+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
@@ -808,6 +808,6 @@ of this software and associated documentation files...
 
 **Crafted with ❤️, AI, and a passion for great food**
 
-![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=100&section=footer)
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,1,2,3,4&height=100&section=footer)
 
 </div>
