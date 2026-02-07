@@ -78,7 +78,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -93,7 +93,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Icon(
                     Icons.restaurant_menu,
                     size: 70,
-                    color: AppTheme.accentGreen,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(height: 16),
 
@@ -104,7 +104,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textDark,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -153,12 +153,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
                       labelText: 'Full Name',
-                      prefixIcon: Icon(Icons.person, color: AppTheme.accentGreen),
+                      prefixIcon: Icon(Icons.person, color: Theme.of(context).colorScheme.secondary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).cardColor,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -175,12 +175,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email, color: AppTheme.accentGreen),
+                      prefixIcon: Icon(Icons.email, color: Theme.of(context).colorScheme.secondary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).cardColor,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -200,11 +200,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock, color: AppTheme.accentGreen),
+                      prefixIcon: Icon(Icons.lock, color: Theme.of(context).colorScheme.secondary),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          color: AppTheme.textMedium,
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
                         ),
                         onPressed: () {
                           setState(() {
@@ -216,7 +216,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).cardColor,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -236,13 +236,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
-                      prefixIcon: Icon(Icons.lock_outline, color: AppTheme.accentGreen),
+                      prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.secondary),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: AppTheme.textMedium,
+                          color: Theme.of(context).textTheme.bodyMedium!.color,
                         ),
                         onPressed: () {
                           setState(() {
@@ -254,7 +254,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).cardColor,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -274,7 +274,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _signUp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentGreen,
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

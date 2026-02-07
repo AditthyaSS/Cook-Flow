@@ -72,14 +72,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
           'Meal Planning',
           style: TextStyle(
-            color: AppTheme.textDark,
+            color: Theme.of(context).textTheme.bodyLarge!.color,
             fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
@@ -105,14 +105,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left, size: 32),
             onPressed: _previousWeek,
-            color: AppTheme.primaryOrange,
+            color: Theme.of(context).colorScheme.primary,
           ),
           GestureDetector(
             onTap: _goToToday,
@@ -120,9 +120,10 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               children: [
                 Text(
                   weekLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge!.color,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -130,7 +131,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                   'Tap to go to today',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textLight,
+                    color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -139,7 +140,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
           IconButton(
             icon: const Icon(Icons.chevron_right, size: 32),
             onPressed: _nextWeek,
-            color: AppTheme.primaryOrange,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ],
       ),
@@ -171,7 +172,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isToday
-            ? BorderSide(color: AppTheme.primaryOrange, width: 2)
+            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
             : BorderSide.none,
       ),
       child: Padding(
@@ -189,7 +190,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isToday ? AppTheme.primaryOrange : AppTheme.textDark,
+                        color: isToday ? Theme.of(context).colorScheme.primary : Theme.of(context).textTheme.bodyLarge!.color,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -197,7 +198,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                       DateFormat('MMM d').format(date),
                       style: TextStyle(
                         fontSize: 16,
-                        color: AppTheme.textMedium,
+                        color: Theme.of(context).textTheme.bodyMedium!.color,
                       ),
                     ),
                     if (isToday) ...[
@@ -205,7 +206,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryOrange,
+                          color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -223,7 +224,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 IconButton(
                   icon: Icon(
                     Icons.add_circle,
-                    color: AppTheme.accentGreen,
+                    color: Theme.of(context).colorScheme.secondary,
                     size: 28,
                   ),
                   onPressed: () => _showAddMealDialog(date),
@@ -237,7 +238,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 child: Text(
                   'No meals planned',
                   style: TextStyle(
-                    color: AppTheme.textLight,
+                    color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.6),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -293,7 +294,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     plan.notes!,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppTheme.textMedium,
+                      color: Theme.of(context).textTheme.bodyMedium!.color,
                     ),
                   ),
                 ],
@@ -456,7 +457,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentGreen,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
               ),
               child: const Text('Add Meal'),
             ),

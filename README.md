@@ -79,7 +79,7 @@ graph LR
 **Beautiful User Experience**
 - 🎨 **Material 3 Design** with warm, food-inspired aesthetics
 - 📱 **Mobile-First** Flutter app for iOS & Android
-- 🌓 **Dark Mode Support** (coming soon)
+- 🌓 **Dark Mode Support** with system theme detection
 - ⚡ **Smooth Animations** & loading states
 
 </td>
