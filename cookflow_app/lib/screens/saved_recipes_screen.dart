@@ -46,7 +46,38 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> with SingleTick
   List<Recipe> get _filteredRecipes {
     final recipes = _tabController.index == 0 ? _allRecipes : _favoriteRecipes;
     if (_searchQuery.isEmpty) return recipes;
-    return recipes.where((r) => r.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+    
+    final query = _searchQuery.toLowerCase();
+    return recipes.where((recipe) {
+      // Search by title
+      if (recipe.title.toLowerCase().contains(query)) return true;
+      
+      // Search by ingredients
+      final hasIngredient = recipe.ingredients.any((ing) =>
+          ing['item']?.toString().toLowerCase().contains(query) ?? false);
+      if (hasIngredient) return true;
+      
+      // Search by tags (if available)
+      if (recipe.tags != null) {
+        final hasTags = recipe.tags!.any((tag) => 
+            tag.toLowerCase().contains(query));
+        if (hasTags) return true;
+      }
+      
+      // Search by cuisine (if available)
+      if (recipe.cuisine != null && 
+          recipe.cuisine!.toLowerCase().contains(query)) {
+        return true;
+      }
+      
+      // Search by difficulty (if available)
+      if (recipe.difficulty != null && 
+          recipe.difficulty!.toLowerCase().contains(query)) {
+        return true;
+      }
+      
+      return false;
+    }).toList();
   }
 
   Future<void> _toggleFavorite(Recipe recipe) async {
@@ -126,10 +157,16 @@ class _SavedRecipesScreenState extends State<SavedRecipesScreen> with SingleTick
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: 'Search recipes...',
+                hintText: 'Search recipes, ingredients, cuisine...',
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => setState(() => _searchQuery = ''),
+                      )
+                    : null,
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
