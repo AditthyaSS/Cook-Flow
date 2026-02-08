@@ -17,7 +17,7 @@ router.post('/generate-grocery-list', authenticateUser, async (req, res) => {
         if (!recipes || !Array.isArray(recipes)) {
             return res.status(400).json({
                 success: false,
-                error: 'recipes array is required'
+                error: 'Recipes array is required'
             });
         }
 
@@ -67,7 +67,7 @@ router.post('/generate-affiliate-links', authenticateUser, async (req, res) => {
         if (!groceryItems || !Array.isArray(groceryItems)) {
             return res.status(400).json({
                 success: false,
-                error: 'groceryItems array is required'
+                error: 'Grocery items array is required'
             });
         }
 

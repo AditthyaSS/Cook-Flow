@@ -79,9 +79,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
+                const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: AppTheme.spacingM),
-                Text('Pasted from clipboard'),
+                const Text('Pasted from clipboard'),
               ],
             ),
             backgroundColor: AppTheme.accentGreen,
@@ -171,9 +171,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white),
+              const Icon(Icons.check_circle, color: Colors.white),
               const SizedBox(width: AppTheme.spacingM),
-              Text('Recipe saved successfully!'),
+              const Text('Recipe saved successfully!'),
             ],
           ),
           backgroundColor: AppTheme.accentGreen,
@@ -252,7 +252,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     padding: const EdgeInsets.all(AppTheme.spacingL),
                     child: Column(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.auto_awesome,
                           size: 48,
                           color: AppTheme.primaryOrange,
@@ -488,7 +488,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       padding: const EdgeInsets.all(AppTheme.spacingXL),
                       child: Column(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.lightbulb_outline,
                             size: 64,
                             color: AppTheme.textLight,
