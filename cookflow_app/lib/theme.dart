@@ -11,6 +11,12 @@ class AppTheme {
   static const Color textMedium = Color(0xFF5D6D7E);
   static const Color textLight = Color(0xFF95A5A6);
   static const Color errorRed = Color(0xFFE74C3C);
+  
+  // Premium/Subscription Colors
+  static const Color premiumGold = Color(0xFFFFD700);
+  static const Color premiumGoldLight = Color(0xFFFFF4C4);
+  static const Color premiumGradientStart = Color(0xFFFF6B35);
+  static const Color premiumGradientEnd = Color(0xFF8BC34A);
 
   // Dark Mode Color Palette - Warm, cozy dark theme
   static const Color darkBackground = Color(0xFF121212);

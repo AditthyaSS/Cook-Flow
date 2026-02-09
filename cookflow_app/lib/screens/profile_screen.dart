@@ -3,6 +3,8 @@ import 'package:cookflow_app/services/auth_service.dart';
 import 'package:cookflow_app/services/firestore_service.dart';
 import 'package:cookflow_app/services/notification_service.dart';
 import 'package:cookflow_app/theme.dart';
+import 'package:cookflow_app/widgets/subscription_status_card.dart';
+import 'package:cookflow_app/screens/paywall_screen.dart';
 
 /// User Profile Screen
 /// Displays account details, settings, and subscription information
@@ -297,73 +299,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSubscriptionCard() {
-    // Placeholder for Phase 4 - RevenueCat integration
-    return Container(
-      margin: const EdgeInsets.all(AppTheme.spacingM),
-      padding: const EdgeInsets.all(AppTheme.spacingL),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primaryOrange.withOpacity(0.1),
-            AppTheme.accentGreen.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusL),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.workspace_premium,
-                color: Theme.of(context).colorScheme.primary,
-                size: 32,
-              ),
-              const SizedBox(width: AppTheme.spacingM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Free Plan',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    Text(
-                      'Enjoy all basic features',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTheme.spacingL),
-          const Text('✓ Unlimited recipe extraction'),
-          const SizedBox(height: AppTheme.spacingS),
-          const Text('✓ Cloud sync across devices'),
-          const SizedBox(height: AppTheme.spacingS),
-          const Text('✓ AI-powered grocery lists'),
-          const SizedBox(height: AppTheme.spacingL),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                _showUpgradeDialog();
-              },
-              icon: const Icon(Icons.star),
-              label: const Text('Upgrade to Premium'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(AppTheme.spacingM),
-              ),
+    // UI-only implementation - hardcoded as Free plan
+    // Will be dynamic when RevenueCat is integrated
+    return Padding(
+      padding: const EdgeInsets.all(AppTheme.spacingM),
+      child: SubscriptionStatusCard(
+        isPremium: false, // Hardcoded for now
+        planType: 'Free',
+        renewalDate: null,
+        onUpgrade: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PaywallScreen(),
             ),
-          ),
-        ],
+          );
+        },
+        onManage: null,
       ),
     );
   }
@@ -589,37 +541,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showUpgradeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.star, color: Colors.amber),
-            SizedBox(width: 8),
-            Text('Upgrade to Premium'),
-          ],
-        ),
-        content: const Text(
-          'Premium features coming soon in Phase 4!\n\n'
-          'Premium will include:\n'
-          '• Unlimited meal plans\n'
-          '• Advanced pantry analytics\n'
-          '• Priority support\n'
-          '• Ad-free experience\n'
-          '• And more!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Maybe Later'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Notify Me'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
