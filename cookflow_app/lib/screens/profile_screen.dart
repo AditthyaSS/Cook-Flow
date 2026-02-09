@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cookflow_app/services/auth_service.dart';
+import 'package:cookflow_app/services/firestore_service.dart';
+import 'package:cookflow_app/services/notification_service.dart';
 import 'package:cookflow_app/theme.dart';
 
 /// User Profile Screen
@@ -13,6 +15,22 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final user = AuthService.instance.currentUser;
+  bool _notificationsEnabled = true;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    await NotificationService.instance.initialize();
+    setState(() {
+      _notificationsEnabled = NotificationService.instance.notificationsEnabled;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,12 +161,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 leading: const Icon(Icons.notifications),
                 title: const Text('Notifications'),
                 subtitle: const Text('Manage notification preferences'),
-                trailing: Switch(
-                  value: true, // Placeholder
-                  onChanged: (value) {
-                    // TODO: Implement notification toggle
-                  },
-                ),
+                trailing: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Switch(
+                        value: _notificationsEnabled,
+                        onChanged: _toggleNotifications,
+                      ),
               ),
             ],
           ),
@@ -486,21 +508,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (confirm == true && mounted) {
-      try {
-        // TODO: Implement account deletion
-        // This should delete Firestore data, then delete the auth account
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account deletion is not yet implemented'),
-            backgroundColor: Colors.orange,
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Deleting account...'),
+            ],
           ),
-        );
+        ),
+      );
+
+      try {
+        // Delete all user data from Firestore
+        await FirestoreService.instance.deleteAllUserData();
+        
+        // Delete the Firebase Auth account
+        await AuthService.instance.deleteAccount();
+        
+        if (mounted) {
+          Navigator.pop(context); // Close loading dialog
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+          
+          // Note: Can't show SnackBar after navigation, but account is deleted
+        }
       } catch (e) {
         if (mounted) {
+          Navigator.pop(context); // Close loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${e.toString()}')),
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
+      }
+    }
+  }
+
+  void _toggleNotifications(bool value) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await NotificationService.instance.setNotificationsEnabled(value);
+      setState(() {
+        _notificationsEnabled = value;
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              value
+                  ? 'Notifications enabled'
+                  : 'Notifications disabled',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

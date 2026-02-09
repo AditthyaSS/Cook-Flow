@@ -7,19 +7,47 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+*~
 
 # Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment variables (contains sensitive keys)
 .env
 .env.local
 .env.production
+.env.*.local
 
-# Firebase Admin SDK credentials (NEVER COMMIT!)
+# Firebase credentials (NEVER COMMIT!)
 backend/firebase-service-account.json
+backend/firebase-adminsdk-*.json
 
-# DO NOT IGNORE - These files should be committed:
-# backend/.env.example (template)
-# cookflow_app/android/app/google-services.json (Firebase Android config)
-# cookflow_app/ios/Runner/GoogleService-Info.plist (Firebase iOS config)
+# Firebase config files (user must download from Firebase Console)
+cookflow_app/android/app/google-services.json
+cookflow_app/ios/Runner/GoogleService-Info.plist
+cookflow_app/lib/firebase_options.dart
+
+# Node.js dependencies
+backend/node_modules/
+**/node_modules/
+package-lock.json
+
+# Build outputs
+backend/dist/
+backend/build/
+
+# Flutter/Dart (handled by cookflow_app/.gitignore)
+# We don't need to duplicate here since Flutter app has its own .gitignore
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# DO NOT IGNORE - Keep these files:
+# backend/.env.example (template for developers)
+# FIREBASE_SETUP.md (setup instructions)
+# FIREBASE_CHECKLIST.md (Firebase setup guide)

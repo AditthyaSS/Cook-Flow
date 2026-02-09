@@ -173,4 +173,39 @@ class FirestoreService {
     await pullRecipes();
     await pullPantryItems();
   }
+
+  /// Delete all user data from Firestore (called before account deletion)
+  Future<void> deleteAllUserData() async {
+    final userId = AuthService.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    final userDocRef = _firestore.collection('users').doc(userId);
+
+    // Delete all subcollections
+    final batch = _firestore.batch();
+
+    // Delete recipes
+    final recipesSnapshot = await userDocRef.collection('recipes').get();
+    for (final doc in recipesSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Delete pantry items
+    final pantrySnapshot = await userDocRef.collection('pantry').get();
+    for (final doc in pantrySnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Delete meal plans  
+    final mealPlansSnapshot = await userDocRef.collection('meal_plans').get();
+    for (final doc in mealPlansSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Commit all deletions
+    await batch.commit();
+
+    // Delete the user document itself
+    await userDocRef.delete();
+  }
 }

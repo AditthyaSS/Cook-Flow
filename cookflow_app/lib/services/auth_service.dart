@@ -134,6 +134,11 @@ class AuthService {
     }
   }
 
+  /// Alias for sendPasswordResetEmail for convenience
+  Future<void> resetPassword(String email) async {
+    await sendPasswordResetEmail(email);
+  }
+
   /// Handle Firebase Auth exceptions and return user-friendly messages
   String _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
